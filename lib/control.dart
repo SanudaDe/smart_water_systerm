@@ -20,11 +20,11 @@ class ControlPage extends StatelessWidget {
     return ElevatedButton.icon(
       onPressed: () => sendCommand(label.toLowerCase(), context),
       icon: Icon(icon),
-      label: Text(label, style: GoogleFonts.poppins(fontSize: 16)),
+      label: Text(label, style: GoogleFonts.poppins(fontSize: 30)),
       style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 150),
         backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
         foregroundColor: Colors.white,
         textStyle: const TextStyle(fontWeight: FontWeight.bold),
       ),
@@ -39,10 +39,10 @@ class ControlPage extends StatelessWidget {
         backgroundColor: Colors.blue[800],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(30.0),
         child: Column(
           children: [
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             _commandButton(
               "Refill",
               Icons.water_drop,
