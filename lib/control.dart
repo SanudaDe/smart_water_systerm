@@ -44,21 +44,21 @@ class ControlPage extends StatelessWidget {
           children: [
             const SizedBox(height: 20),
             _commandButton(
-              "Refill",
+              "REFILL",
               Icons.water_drop,
               Colors.blueAccent,
               context,
             ),
             const SizedBox(height: 20),
             _commandButton(
-              "Clean",
+              "CLEAN",
               Icons.cleaning_services,
               Colors.orange,
               context,
             ),
             const SizedBox(height: 20),
             _commandButton(
-              "Flush",
+              "FLUSH",
               Icons.wash_rounded,
               Colors.redAccent,
               context,
