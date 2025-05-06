@@ -1,0 +1,87 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class ControlPage extends StatelessWidget {
+  const ControlPage({super.key});
+
+  void sendCommand(String command, BuildContext context) {
+    // Just show a message without sending to Firebase
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Pretend sent "$command" command')));
+  }
+
+  Widget _commandButton(
+    String label,
+    IconData icon,
+    Color color,
+    BuildContext context,
+  ) {
+    return ElevatedButton.icon(
+      onPressed: () => sendCommand(label.toLowerCase(), context),
+      icon: Icon(icon),
+      label: Text(label, style: GoogleFonts.poppins(fontSize: 16)),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        backgroundColor: color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        foregroundColor: Colors.white,
+        textStyle: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Tank Controls", style: GoogleFonts.poppins()),
+        backgroundColor: Colors.blue[800],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            _commandButton(
+              "Refill",
+              Icons.water_drop,
+              Colors.blueAccent,
+              context,
+            ),
+            const SizedBox(height: 20),
+            _commandButton(
+              "Clean",
+              Icons.cleaning_services,
+              Colors.orange,
+              context,
+            ),
+            const SizedBox(height: 20),
+            _commandButton(
+              "Flush",
+              Icons.wash_rounded,
+              Colors.redAccent,
+              context,
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) Navigator.pushNamed(context, '/');
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: "Dashboard",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "Controls",
+          ),
+        ],
+      ),
+    );
+  }
+}

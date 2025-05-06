@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dashboard.dart';
+import 'control.dart';
 
 void main() {
   runApp(const MainApp());
@@ -9,12 +11,12 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+      title: 'AquaSense',
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
+      debugShowCheckedModeBanner: false,
+      home: DashboardPage(), // ✅ Go directly to dashboard
+      routes: {'/control': (context) => ControlPage()},
     );
   }
 }

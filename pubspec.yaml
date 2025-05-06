@@ -7,9 +7,12 @@ environment:
   sdk: ^3.7.0
 
 dependencies:
-  flutter:
+   flutter:
     sdk: flutter
-
+   firebase_core: ^2.0.0
+   firebase_database: ^10.0.6
+   google_fonts: ^6.0.0
+   
 dev_dependencies:
   flutter_test:
     sdk: flutter
