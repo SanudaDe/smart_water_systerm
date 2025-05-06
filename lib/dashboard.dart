@@ -29,8 +29,8 @@ class DashboardPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Welcome!", style: GoogleFonts.poppins(fontSize: 24)),
-            const SizedBox(height: 20),
+            Text("Welcome!", style: GoogleFonts.poppins(fontSize: 30)),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -38,13 +38,13 @@ class DashboardPage extends StatelessWidget {
                   "💧",
                   "Water",
                   "${waterLevel.toStringAsFixed(1)}\"",
-                  Colors.blue[300]!,
+                  const Color.fromARGB(255, 14, 134, 231)!,
                 ),
                 _sensorCard(
                   "🌡️",
                   "Temp",
                   "${temp.toStringAsFixed(1)} °C",
-                  Colors.orange[300]!,
+                  const Color.fromARGB(255, 255, 0, 0)!,
                 ),
                 _sensorCard("⚗️", "pH", ph.toStringAsFixed(1), _getPhColor(ph)),
               ],
@@ -76,7 +76,7 @@ class DashboardPage extends StatelessWidget {
   Widget _sensorCard(String icon, String label, String value, Color color) {
     return Expanded(
       child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         elevation: 4,
         child: Padding(
           padding: const EdgeInsets.all(14.0),
