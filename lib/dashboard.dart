@@ -41,11 +41,10 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Sample values
     const waterLevel = 8.9;
     const temperature = 38.1;
     const phQuality = 6.2;
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1A),
       bottomNavigationBar: Container(
@@ -67,7 +66,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
             onTap: _onItemTapped,
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.grey,
-            showSelectedLabels: _selectedIndex == 0, // Only show label for Home
+            showSelectedLabels: _selectedIndex == 0,
             showUnselectedLabels: false,
             items: [
               BottomNavigationBarItem(
@@ -80,7 +79,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
-                      Icon(Icons.home, size: 20),
+                      Icon(Icons.home, size: 22),
                       SizedBox(width: 8),
                       Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
                     ],
@@ -90,16 +89,16 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
               ),
               BottomNavigationBarItem(
                 icon: SizedBox(
-                  height: 24,
+                  height: 28,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Container(width: 4, height: 12, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
-                      const SizedBox(width: 3),
-                      Container(width: 4, height: 18, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
-                      const SizedBox(width: 3),
                       Container(width: 4, height: 14, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
+                      const SizedBox(width: 3),
+                      Container(width: 4, height: 20, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
+                      const SizedBox(width: 3),
+                      Container(width: 4, height: 16, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
                     ],
                   ),
                 ),
@@ -115,22 +114,21 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dynamic greeting text based on time of day
               Text(
                 "$_greeting,",
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              
-              const SizedBox(height: 20),
-              
+
+              const SizedBox(height: 30),
+
               // Water level card
               Container(
                 height: 180,
@@ -140,9 +138,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                 ),
                 child: Column(
                   children: [
-                    // Water icon and label
                     Container(
-                      color: Colors.transparent,
                       padding: const EdgeInsets.all(12),
                       child: Row(
                         children: [
@@ -155,7 +151,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             child: const Icon(
                               Icons.water_drop,
                               color: Colors.white,
-                              size: 18,
+                              size: 20,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -163,54 +159,51 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             "Water",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 18,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    
-                    // Water level visualization
+
                     Expanded(
-                      child: Stack(
-                        children: [
-                          // Water level text
-                          Positioned(
-                            top: 10,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: Text(
-                                "$waterLevel Gal",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                          
-                          // Water wave
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: 80, // Adjust based on water level
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: 20,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(100),
-                                      topRight: Radius.circular(100),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    color: Colors.blue[400],
+  child: Stack(
+    children: [
+      // Water wave and text inside it
+      Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 100,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Column(
+              children: [
+                Container(
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(100),
+                      topRight: Radius.circular(100),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    color: Colors.blue[400],
+                  ),
+                ),
+              ],
+            ),
+            // Value displayed on top of the water area
+            Text(
+              "Gal $waterLevel",
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
@@ -222,15 +215,15 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 20),
-              
+
+              const SizedBox(height: 30),
+
               // Control buttons
               Row(
                 children: [
                   Expanded(
                     child: Container(
-                      height: 50,
+                      height: 60,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8),
@@ -240,16 +233,16 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                           "Refill Tank",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: 18,
                           ),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 24),
                   Expanded(
                     child: Container(
-                      height: 50,
+                      height: 60,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8),
@@ -259,7 +252,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                           "Clean Tank",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
+                            fontSize: 18,
                           ),
                         ),
                       ),
@@ -267,16 +260,15 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                   ),
                 ],
               ),
-              
-              const SizedBox(height: 20),
-              
+
+              const SizedBox(height: 30),
+
               // Sensor readings
               Row(
                 children: [
-                  // Temperature
                   Expanded(
                     child: Container(
-                      height: 80,
+                      height: 100,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8),
@@ -288,7 +280,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             "$temperature",
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -296,18 +288,17 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             "Temperature",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 16,
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  // pH Quality
+                  const SizedBox(width: 24),
                   Expanded(
                     child: Container(
-                      height: 80,
+                      height: 100,
                       decoration: BoxDecoration(
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8),
@@ -319,7 +310,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             "$phQuality",
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -327,7 +318,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             "PH Quality",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 16,
                             ),
                           ),
                         ],
@@ -336,10 +327,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                   ),
                 ],
               ),
-              
-              const Spacer(),
-              
-              // Spacer to push content up
+
               const Spacer(),
             ],
           ),
