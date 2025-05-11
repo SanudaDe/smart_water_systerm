@@ -12,6 +12,8 @@ dependencies:
    firebase_core: ^2.0.0
    firebase_database: ^10.0.6
    google_fonts: ^6.0.0
+   percent_indicator: ^4.2.3
+   fl_chart: ^0.63.0 
    
 dev_dependencies:
   flutter_test:

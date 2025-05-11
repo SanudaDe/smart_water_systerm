@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smart_water_systerm/statistics.dart';
 
 class AquariumControlPage extends StatefulWidget {
   const AquariumControlPage({super.key});
@@ -37,6 +38,18 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
     setState(() {
       _selectedIndex = index;
     });
+    
+    // Navigate to statistics screen when pressing the analytics button (index 1)
+    if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+      );
+      // Reset selected index to 0 after navigation so Home remains selected when returning
+      setState(() {
+        _selectedIndex = 0;
+      });
+    }
   }
 
   void sendCommand(String command) {
@@ -54,70 +67,85 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1A),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              color: Colors.black.withOpacity(0.2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.black,
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.grey,
-            showSelectedLabels: _selectedIndex == 0,
-            showUnselectedLabels: false,
-            items: [
-              BottomNavigationBarItem(
-                icon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _selectedIndex == 0 ? Colors.green : Colors.transparent,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.home, size: 22),
-                      SizedBox(width: 8),
-                      Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: SizedBox(
-                  height: 28,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(width: 4, height: 14, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
-                      const SizedBox(width: 3),
-                      Container(width: 4, height: 20, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
-                      const SizedBox(width: 3),
-                      Container(width: 4, height: 16, color: _selectedIndex == 1 ? Colors.white : Colors.grey),
-                    ],
-                  ),
-                ),
-                label: '',
-              ),
-              const BottomNavigationBarItem(
-                icon: Icon(Icons.settings),
-                label: '',
-              ),
-            ],
-          ),
-        ),
+  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+  decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(30),
+    boxShadow: [
+      BoxShadow(
+        blurRadius: 20,
+        color: Colors.black.withOpacity(0.2),
       ),
+    ],
+  ),
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(30),
+    child: BottomNavigationBar(
+      backgroundColor: Colors.black,
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+      selectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey,
+      showSelectedLabels: true, // Show labels for all selected items
+      showUnselectedLabels: false,
+      items: [
+        BottomNavigationBarItem(
+          icon: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: _selectedIndex == 0 ? Colors.green : Colors.transparent,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.home, size: 22),
+                SizedBox(width: 8),
+                Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: _selectedIndex == 1 ? Colors.blue : Colors.transparent,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.analytics, size: 22),
+                SizedBox(width: 8),
+                Text("Analytics", style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          label: '',
+        ),
+        BottomNavigationBarItem(
+          icon: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: _selectedIndex == 2 ? Colors.orange : Colors.transparent,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.settings, size: 22),
+                SizedBox(width: 8),
+                Text("Settings", style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+          label: '',
+        ),
+      ],
+    ),
+  ),
+),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -347,6 +375,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Aquarium Control',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
