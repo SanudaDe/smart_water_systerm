@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dashboard.dart';
-import 'control.dart';
+import 'package:smart_water_systerm/statistics.dart';
+import 'package:smart_water_systerm/dashboard.dart';
+import 'package:smart_water_systerm/settings.dart';
 
 void main() {
   runApp(const MainApp());
@@ -13,10 +14,20 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'AquaSense',
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
+        // Add dark theme configuration to match your app's style
+        brightness: Brightness.dark,
+      ),
       debugShowCheckedModeBanner: false,
-      home: AquariumControlPage(), // ✅ Go directly to dashboard
-      routes: {'/control': (context) => ControlPage()},
+      // Initial route setup
+      initialRoute: '/dashboard',
+      routes: {
+        '/dashboard': (context) => const AquariumControlPage(),
+        '/statistics': (context) => const StatisticsScreen(),
+        '/settings': (context) => const SettingsScreen(),
+      },
     );
   }
 }

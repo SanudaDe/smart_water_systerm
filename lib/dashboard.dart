@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smart_water_systerm/settings.dart';
 import 'package:smart_water_systerm/statistics.dart';
 
 class AquariumControlPage extends StatefulWidget {
@@ -39,15 +40,23 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
       _selectedIndex = index;
     });
     
-    // Navigate to statistics screen when pressing the analytics button (index 1)
     if (index == 1) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const StatisticsScreen()),
-      );
-      // Reset selected index to 0 after navigation so Home remains selected when returning
-      setState(() {
-        _selectedIndex = 0;
+      ).then((_) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      });
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      ).then((_) {
+        setState(() {
+          _selectedIndex = 0;
+        });
       });
     }
   }
@@ -366,25 +375,4 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
       ),
     );
   }
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Aquarium Control',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const AquariumControlPage(),
-    );
-  }
-}
-
-void main() {
-  runApp(const MyApp());
 }

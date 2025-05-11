@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smart_water_systerm/dashboard.dart';
+import 'package:smart_water_systerm/settings.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -15,11 +17,34 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     setState(() {
       _selectedIndex = index;
     });
-    
     if (index == 0) {
-      Navigator.pop(context); // Go back to home
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const AquariumControlPage()),
+      ).then((_) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      });
+    }else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+      ).then((_) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      });
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const SettingsScreen()),
+      ).then((_) {
+        setState(() {
+          _selectedIndex = 0;
+        });
+      });
     }
-    // Add additional navigation logic for other tabs if needed
   }
 
   @override
