@@ -15,7 +15,7 @@ class MainApp extends StatelessWidget {
       title: 'AquaSense',
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
       debugShowCheckedModeBanner: false,
-      home: DashboardPage(), // ✅ Go directly to dashboard
+      home: AquariumControlPage(), // ✅ Go directly to dashboard
       routes: {'/control': (context) => ControlPage()},
     );
   }
