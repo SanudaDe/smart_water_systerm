@@ -39,6 +39,12 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
     });
   }
 
+  void sendCommand(String command) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Pretend sent "$command" command')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const waterLevel = 8.9;
@@ -120,7 +126,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
             children: [
               Text(
                 "$_greeting,",
-                style: const TextStyle(
+                style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -165,45 +171,42 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                         ],
                       ),
                     ),
-
                     Expanded(
-  child: Stack(
-    children: [
-      // Water wave and text inside it
-      Positioned(
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 100,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Column(
-              children: [
-                Container(
-                  height: 24,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(100),
-                      topRight: Radius.circular(100),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    color: Colors.blue[400],
-                  ),
-                ),
-              ],
-            ),
-            // Value displayed on top of the water area
-            Text(
-              "Gal $waterLevel",
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 100,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Column(
+                                  children: [
+                                    Container(
+                                      height: 24,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(100),
+                                          topRight: Radius.circular(100),
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        color: Colors.blue[400],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  "Gal $waterLevel",
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
@@ -218,42 +221,42 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
 
               const SizedBox(height: 30),
 
-              // Control buttons
+              // Refill and Clean buttons
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "Refill Tank",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                    child: ElevatedButton.icon(
+                      onPressed: () => sendCommand("refill"),
+                      icon: const Icon(Icons.water_drop),
+                      label: const Text("Refill Tank"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 24),
                   Expanded(
-                    child: Container(
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          "Clean Tank",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                    child: ElevatedButton.icon(
+                      onPressed: () => sendCommand("clean"),
+                      icon: const Icon(Icons.cleaning_services),
+                      label: const Text("Clean Tank"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        textStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
