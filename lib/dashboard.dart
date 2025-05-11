@@ -19,17 +19,26 @@ class DashboardPage extends StatelessWidget {
     String status = "System operating normally";
 
     return Scaffold(
-      backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: Text("AquaSense", style: GoogleFonts.poppins()),
-        backgroundColor: Colors.blue[800],
+  backgroundColor: Colors.grey[100],
+  appBar: AppBar(
+    title: Text(
+      "AquaSense", 
+      style: GoogleFonts.poppins(fontSize: 32,
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
       ),
+    ),
+    centerTitle: true,
+    backgroundColor: Colors.blue[800],
+  ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Welcome!", style: GoogleFonts.poppins(fontSize: 30)),
+            Text("Welcome!", style: GoogleFonts.poppins(fontSize: 28,
+            fontWeight: FontWeight.bold,)),
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -38,13 +47,13 @@ class DashboardPage extends StatelessWidget {
                   "💧",
                   "Water",
                   "${waterLevel.toStringAsFixed(1)}\"",
-                  const Color.fromARGB(255, 14, 134, 231)!,
+                  const Color.fromARGB(255, 14, 134, 231),
                 ),
                 _sensorCard(
                   "🌡️",
                   "Temp",
                   "${temp.toStringAsFixed(1)} °C",
-                  const Color.fromARGB(255, 255, 0, 0)!,
+                  const Color.fromARGB(255, 255, 0, 0),
                 ),
                 _sensorCard("⚗️", "pH", ph.toStringAsFixed(1), _getPhColor(ph)),
               ],
