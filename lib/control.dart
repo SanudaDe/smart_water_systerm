@@ -34,9 +34,22 @@ class ControlPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text("Tank Controls", style: GoogleFonts.poppins()),
+        title: Text(
+          "Tank Controls",
+          style: GoogleFonts.poppins(
+            fontSize: 32,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.blue[800],
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: const Color.fromARGB(255, 255, 255, 255)),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/'),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(30.0),
@@ -69,7 +82,7 @@ class ControlPage extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         onTap: (index) {
-          if (index == 0) Navigator.pushNamed(context, '/');
+          if (index == 0) Navigator.pushReplacementNamed(context, '/');
         },
         items: const [
           BottomNavigationBarItem(

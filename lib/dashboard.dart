@@ -19,19 +19,19 @@ class DashboardPage extends StatelessWidget {
     String status = "System operating normally";
 
     return Scaffold(
-  backgroundColor: Colors.grey[100],
-  appBar: AppBar(
-    title: Text(
-      "AquaSense", 
-      style: GoogleFonts.poppins(fontSize: 32,
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: Text(
+          "AquaSense", 
+          style: GoogleFonts.poppins(fontSize: 32,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue[800],
+        automaticallyImplyLeading: false, // This prevents the back button from appearing
       ),
-    ),
-    centerTitle: true,
-    backgroundColor: Colors.blue[800],
-  ),
-
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -66,7 +66,9 @@ class DashboardPage extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
         onTap: (index) {
-          if (index == 1) Navigator.pushNamed(context, '/control');
+          if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/control'); // Use pushReplacement instead of push
+          }
         },
         items: const [
           BottomNavigationBarItem(
