@@ -11,9 +11,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _notificationsEnabled = true;
-  bool _darkMode = false;
-  String _selectedLanguage = 'en';
+ 
 
   void _showPersonalInfoDialog() {
     showDialog(
@@ -444,65 +442,8 @@ If you have any questions about these Terms, please contact us at support@smartw
             trailing: const Icon(Icons.chevron_right, color: Colors.grey),
             onTap: _showPersonalInfoDialog,
           ),
-          ListTile(
-            leading: const Icon(Icons.notifications_outlined, color: Colors.white),
-            title: Text(
-              'Notification',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            trailing: Switch(
-              value: _notificationsEnabled,
-              onChanged: (value) {
-                setState(() {
-                  _notificationsEnabled = value;
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      value ? 'Notifications enabled' : 'Notifications disabled',
-                      style: GoogleFonts.poppins(),
-                    ),
-                  ),
-                );
-              },
-              activeColor: Colors.orange,
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.language_outlined, color: Colors.white),
-            title: Text(
-              'Language',
-              style: GoogleFonts.poppins(color: Colors.white),
-            ),
-            trailing: DropdownButton<String>(
-              value: _selectedLanguage,
-              dropdownColor: Colors.grey[900],
-              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-              items: const [
-                DropdownMenuItem(
-                  value: 'en',
-                  child: Text('English', style: TextStyle(color: Colors.white)),
-                )
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() {
-                    _selectedLanguage = value;
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Language changed to ${value == 'en' ? 'English' : value == 'es' ? 'Spanish' : 'French'}',
-                        style: GoogleFonts.poppins(),
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ),
-          const Divider(height: 40, thickness: 1, color: Colors.grey),
-
+          
+         
           // Privacy & Security section
           _buildSectionHeader('Privacy & Security'),
           ListTile(
