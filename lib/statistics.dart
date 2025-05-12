@@ -473,35 +473,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
     return Colors.orange;
   }
 
-  Widget _buildProductItem(String name) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: Colors.blue[400],
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            name,
-            style: const TextStyle(
-              color: Colors.white,
-            ),
-          ),
-          const Spacer(),
-          Icon(
-            Icons.chevron_right,
-            color: Colors.grey[400],
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _LegendItem extends StatelessWidget {

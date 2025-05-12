@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smart_water_systerm/settings.dart';
 import 'package:smart_water_systerm/statistics.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:async';
 
 class AquariumControlPage extends StatefulWidget {
   const AquariumControlPage({super.key});
@@ -13,11 +16,55 @@ class AquariumControlPage extends StatefulWidget {
 class _AquariumControlPageState extends State<AquariumControlPage> {
   int _selectedIndex = 0;
   String _greeting = "";
+  
+  // Sensor data variables
+  double waterLevel = 0.0;
+  double temperature = 0.0;
+  double phQuality = 0.0;
+  
+  // Timer for periodic updates
+  Timer? _timer;
+  
+  // API endpoint - replace with your actual IoT device endpoint
+  final String apiUrl = "https://your-iot-api-endpoint.com/sensors";
 
   @override
   void initState() {
     super.initState();
     _updateGreeting();
+    _fetchSensorData();
+    
+    // Set up periodic updates every 5 seconds
+    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) {
+      _fetchSensorData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchSensorData() async {
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          waterLevel = double.tryParse(data['water_level'].toString()) ?? 0.0;
+          temperature = double.tryParse(data['temperature'].toString()) ?? 0.0;
+          phQuality = double.tryParse(data['ph_quality'].toString()) ?? 0.0;
+        });
+      } else {
+        // Handle error - you might want to show a snackbar or keep old values
+        print('Failed to fetch sensor data: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching sensor data: $e');
+      // You might want to show an error to the user here
+    }
   }
 
   void _updateGreeting() {
@@ -62,99 +109,100 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
   }
 
   void sendCommand(String command) {
+    // Implement actual IoT command sending here
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Pretend sent "$command" command')),
+      SnackBar(content: Text('Sent "$command" command to device')),
     );
+    
+    // Example of sending a command to your IoT device
+    // http.post(Uri.parse('https://your-iot-api-endpoint.com/commands'), 
+    //   body: json.encode({'command': command}));
   }
 
   @override
   Widget build(BuildContext context) {
-    const waterLevel = 8.9;
-    const temperature = 38.1;
-    const phQuality = 6.2;
-
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1A),
       bottomNavigationBar: Container(
-  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(30),
-    boxShadow: [
-      BoxShadow(
-        blurRadius: 20,
-        color: Colors.black.withOpacity(0.2),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 20,
+              color: Colors.black.withOpacity(0.2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: BottomNavigationBar(
+            backgroundColor: Colors.black,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.grey,
+            showSelectedLabels: true,
+            showUnselectedLabels: false,
+            items: [
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 0 ? Colors.green : Colors.transparent,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.home, size: 22),
+                      SizedBox(width: 8),
+                      Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 1 ? Colors.blue : Colors.transparent,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.analytics, size: 22),
+                      SizedBox(width: 8),
+                      Text("Analytics", style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _selectedIndex == 2 ? Colors.orange : Colors.transparent,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.settings, size: 22),
+                      SizedBox(width: 8),
+                      Text("Settings", style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                label: '',
+              ),
+            ],
+          ),
+        ),
       ),
-    ],
-  ),
-  child: ClipRRect(
-    borderRadius: BorderRadius.circular(30),
-    child: BottomNavigationBar(
-      backgroundColor: Colors.black,
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.grey,
-      showSelectedLabels: true, // Show labels for all selected items
-      showUnselectedLabels: false,
-      items: [
-        BottomNavigationBarItem(
-          icon: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: _selectedIndex == 0 ? Colors.green : Colors.transparent,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.home, size: 22),
-                SizedBox(width: 8),
-                Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-          label: '',
-        ),
-        BottomNavigationBarItem(
-          icon: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: _selectedIndex == 1 ? Colors.blue : Colors.transparent,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.analytics, size: 22),
-                SizedBox(width: 8),
-                Text("Analytics", style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-          label: '',
-        ),
-        BottomNavigationBarItem(
-          icon: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: _selectedIndex == 2 ? Colors.orange : Colors.transparent,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.settings, size: 22),
-                SizedBox(width: 8),
-                Text("Settings", style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-          label: '',
-        ),
-      ],
-    ),
-  ),
-),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
@@ -205,6 +253,12 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                               fontSize: 18,
                             ),
                           ),
+                          const Spacer(),
+                          // Add refresh button
+                          IconButton(
+                            icon: const Icon(Icons.refresh, color: Colors.white),
+                            onPressed: _fetchSensorData,
+                          ),
                         ],
                       ),
                     ),
@@ -215,7 +269,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             bottom: 0,
                             left: 0,
                             right: 0,
-                            height: 100,
+                            height: 100 * (waterLevel / 10), // Assuming 10 is max level
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
@@ -239,7 +293,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                                   ],
                                 ),
                                 Text(
-                                  "Gal $waterLevel",
+                                  "Gal ${waterLevel.toStringAsFixed(1)}",
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontSize: 18,
@@ -317,7 +371,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "$temperature",
+                            "${temperature.toStringAsFixed(1)}°C",
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 26,
@@ -347,7 +401,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "$phQuality",
+                            phQuality.toStringAsFixed(1),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 26,
