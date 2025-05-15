@@ -1,9 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_water_systerm/statistics.dart';
-import 'package:smart_water_systerm/dashboard.dart';
-import 'package:smart_water_systerm/settings.dart';
+import 'package:smart_water_systerm/signin.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MainApp());
 }
 
@@ -12,22 +13,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'AquaSense',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-        // Add dark theme configuration to match your app's style
-        brightness: Brightness.dark,
-      ),
-      debugShowCheckedModeBanner: false,
-      // Initial route setup
-      initialRoute: '/dashboard',
-      routes: {
-        '/dashboard': (context) => const AquariumControlPage(),
-        '/statistics': (context) => const StatisticsScreen(),
-        '/settings': (context) => const SettingsScreen(),
-      },
-    );
+    return const MaterialApp(debugShowCheckedModeBanner: false, home: Google());
   }
 }
