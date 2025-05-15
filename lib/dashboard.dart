@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:fl_chart/fl_chart.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -11,9 +12,10 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  double waterLevel = 0.0;
+  double waterLevelPercent = 0.0;
   double temperature = 0.0;
   double phQuality = 0.0;
+  String tankStatus = "Loading...";
   Timer? _timer;
 
   final String firebaseUrl =
@@ -41,10 +43,20 @@ class _DashboardPageState extends State<DashboardPage> {
       final response = await http.get(Uri.parse(firebaseUrl));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        final distance = double.tryParse(data['distance'].toString()) ?? 27.0;
+        final tempF = double.tryParse(data['temperature'].toString()) ?? 0.0;
+        final tempC = (tempF - 32) * 5 / 9; // Convert Fahrenheit to Celsius
+        final ph = double.tryParse(data['ph'].toString()) ?? 0.0;
+        final status = data['pump_status'] ?? "Unknown";
+
         setState(() {
-          waterLevel = double.tryParse(data['distance'].toString()) ?? 0.0;
-          temperature = double.tryParse(data['temperature'].toString()) ?? 0.0;
-          phQuality = double.tryParse(data['ph'].toString()) ?? 0.0;
+          waterLevelPercent = _convertDistanceToPercentage(distance);
+          temperature = tempC;
+          phQuality = ph;
+          tankStatus =
+              status == "ON"
+                  ? "Filling..."
+                  : (waterLevelPercent >= 95 ? "Full" : "Normal");
         });
       } else {
         debugPrint('Failed to load Firebase data');
@@ -52,6 +64,16 @@ class _DashboardPageState extends State<DashboardPage> {
     } catch (e) {
       debugPrint('Error fetching Firebase data: $e');
     }
+  }
+
+  double _convertDistanceToPercentage(double distance) {
+    const double emptyCM = 27.0;
+    const double fullCM = 9.0;
+
+    if (distance >= emptyCM) return 0.0;
+    if (distance <= fullCM) return 100.0;
+
+    return ((emptyCM - distance) / (emptyCM - fullCM)) * 100;
   }
 
   Future<void> triggerWasherMotor() async {
@@ -72,70 +94,6 @@ class _DashboardPageState extends State<DashboardPage> {
         context,
       ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1E1E1A),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const Text(
-              'Smart Water Tank',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            _buildSensorCard("Water Level", "$waterLevel cm", Icons.water_drop),
-            const SizedBox(height: 20),
-            _buildSensorCard(
-              "Temperature",
-              "$temperature °C",
-              Icons.thermostat,
-            ),
-            const SizedBox(height: 20),
-            _buildSensorCard("pH Quality", "$phQuality", Icons.science),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Future refill logic
-                  },
-                  icon: const Icon(Icons.water),
-                  label: const Text("Refill"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
-                    ),
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: triggerWasherMotor,
-                  icon: const Icon(Icons.cleaning_services),
-                  label: const Text("Clean"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildSensorCard(String label, String value, IconData icon) {
@@ -167,6 +125,80 @@ class _DashboardPageState extends State<DashboardPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDiagram() {
+    return Container(
+      margin: const EdgeInsets.only(top: 30),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            "Tank Diagram (placeholder)",
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          SizedBox(height: 10),
+          Icon(Icons.auto_graph, size: 48, color: Colors.blueAccent),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1E1E1A),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
+          children: [
+            const Text(
+              'Smart Water Tank',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildSensorCard(
+              "Water Level",
+              "${waterLevelPercent.toStringAsFixed(1)}%",
+              Icons.water_drop,
+            ),
+            const SizedBox(height: 20),
+            _buildSensorCard(
+              "Temperature",
+              "${temperature.toStringAsFixed(1)} °C",
+              Icons.thermostat,
+            ),
+            const SizedBox(height: 20),
+            _buildSensorCard("pH Quality", "$phQuality", Icons.science),
+            const SizedBox(height: 20),
+            _buildSensorCard("Tank Status", tankStatus, Icons.info),
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              onPressed: triggerWasherMotor,
+              icon: const Icon(Icons.cleaning_services),
+              label: const Text("Clean"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+              ),
+            ),
+            _buildDiagram(),
+          ],
+        ),
       ),
     );
   }
