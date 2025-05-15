@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:smart_water_systerm/signin.dart';
 import 'package:smart_water_systerm/statistics.dart';
 import 'package:smart_water_systerm/dashboard.dart';
 
@@ -11,68 +14,58 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
- 
-
   void _showPersonalInfoDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Personal Information',
-          style: GoogleFonts.poppins(),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Name',
-                labelStyle: GoogleFonts.poppins(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: GoogleFonts.poppins(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Phone',
-                labelStyle: GoogleFonts.poppins(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Information updated',
-                    style: GoogleFonts.poppins(),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Personal Information', style: GoogleFonts.poppins()),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Name',
+                    labelStyle: GoogleFonts.poppins(),
                   ),
                 ),
-              );
-            },
-            child: Text(
-              'Save',
-              style: GoogleFonts.poppins(),
+                const SizedBox(height: 10),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: GoogleFonts.poppins(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: 'Phone',
+                    labelStyle: GoogleFonts.poppins(),
+                  ),
+                ),
+              ],
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel', style: GoogleFonts.poppins()),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Information updated',
+                        style: GoogleFonts.poppins(),
+                      ),
+                    ),
+                  );
+                },
+                child: Text('Save', style: GoogleFonts.poppins()),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -83,226 +76,184 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Change Password',
-          style: GoogleFonts.poppins(),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: currentPasswordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Current Password',
-                labelStyle: GoogleFonts.poppins(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: newPasswordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'New Password',
-                labelStyle: GoogleFonts.poppins(),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: confirmPasswordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Confirm Password',
-                labelStyle: GoogleFonts.poppins(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              if (newPasswordController.text != confirmPasswordController.text) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Passwords do not match',
-                      style: GoogleFonts.poppins(),
-                    ),
-                  ),
-                );
-                return;
-              }
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Password changed successfully',
-                    style: GoogleFonts.poppins(),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Change Password', style: GoogleFonts.poppins()),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: currentPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Current Password',
+                    labelStyle: GoogleFonts.poppins(),
                   ),
                 ),
-              );
-            },
-            child: Text(
-              'Change',
-              style: GoogleFonts.poppins(),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: newPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'New Password',
+                    labelStyle: GoogleFonts.poppins(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: 'Confirm Password',
+                    labelStyle: GoogleFonts.poppins(),
+                  ),
+                ),
+              ],
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel', style: GoogleFonts.poppins()),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (newPasswordController.text !=
+                      confirmPasswordController.text) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Passwords do not match',
+                          style: GoogleFonts.poppins(),
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Password changed successfully',
+                        style: GoogleFonts.poppins(),
+                      ),
+                    ),
+                  );
+                },
+                child: Text('Change', style: GoogleFonts.poppins()),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showHelpSupportDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Help & Support',
-          style: GoogleFonts.poppins(),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.email),
-              title: Text(
-                'Email Support',
-                style: GoogleFonts.poppins(),
+      builder:
+          (context) => AlertDialog(
+            title: Text('Help & Support', style: GoogleFonts.poppins()),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.email),
+                  title: Text('Email Support', style: GoogleFonts.poppins()),
+                  subtitle: const Text('support@smartwater.com'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: const Icon(Icons.phone),
+                  title: Text('Call Support', style: GoogleFonts.poppins()),
+                  subtitle: const Text('+1 234 567 8900'),
+                  onTap: () {},
+                ),
+                ListTile(
+                  leading: const Icon(Icons.chat),
+                  title: Text('Live Chat', style: GoogleFonts.poppins()),
+                  onTap: () {},
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Close', style: GoogleFonts.poppins()),
               ),
-              subtitle: const Text('support@smartwater.com'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.phone),
-              title: Text(
-                'Call Support',
-                style: GoogleFonts.poppins(),
-              ),
-              subtitle: const Text('+1 234 567 8900'),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: const Icon(Icons.chat),
-              title: Text(
-                'Live Chat',
-                style: GoogleFonts.poppins(),
-              ),
-              onTap: () {},
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Close',
-              style: GoogleFonts.poppins(),
-            ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showAboutDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'About',
-          style: GoogleFonts.poppins(),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FlutterLogo(size: 80),
-            const SizedBox(height: 16),
-            Text(
-              'Smart Water System v1.0.0',
-              style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+      builder:
+          (context) => AlertDialog(
+            title: Text('About', style: GoogleFonts.poppins()),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const FlutterLogo(size: 80),
+                const SizedBox(height: 16),
+                Text(
+                  'Smart Water System v1.0.0',
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '© 2023 Smart Water System. All rights reserved.',
+                  style: GoogleFonts.poppins(),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              '© 2023 Smart Water System. All rights reserved.',
-              style: GoogleFonts.poppins(),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Close',
-              style: GoogleFonts.poppins(),
-            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Close', style: GoogleFonts.poppins()),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showLogoutConfirm() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Log Out',
-          style: GoogleFonts.poppins(),
-        ),
-        content: Text(
-          'Are you sure you want to log out?',
-          style: GoogleFonts.poppins(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'No',
+      builder:
+          (context) => AlertDialog(
+            title: Text('Log Out', style: GoogleFonts.poppins()),
+            content: Text(
+              'Are you sure you want to log out?',
               style: GoogleFonts.poppins(),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Add logout functionality here
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Logged out successfully',
-                    style: GoogleFonts.poppins(),
-                  ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('No', style: GoogleFonts.poppins()),
+              ),
+              TextButton(
+                onPressed: () {
+                  signOutAndRedirect(context);
+                },
+                child: Text(
+                  'Yes',
+                  style: GoogleFonts.poppins(color: Colors.red),
                 ),
-              );
-            },
-            child: Text(
-              'Yes',
-              style: GoogleFonts.poppins(color: Colors.red),
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showPrivacyPolicy() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Privacy Policy',
-          style: GoogleFonts.poppins(),
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            '''Privacy Policy for Smart Water System
+      builder:
+          (context) => AlertDialog(
+            title: Text('Privacy Policy', style: GoogleFonts.poppins()),
+            content: SingleChildScrollView(
+              child: Text(
+                '''Privacy Policy for Smart Water System
 
 Effective Date: [Date]
 
@@ -342,33 +293,28 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 6. Contact Us
 
 If you have any questions about this Privacy Policy, please contact us at support@smartwater.com''',
-            style: GoogleFonts.poppins(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Close',
-              style: GoogleFonts.poppins(),
+                style: GoogleFonts.poppins(),
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Close', style: GoogleFonts.poppins()),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showTerms() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Terms and Conditions',
-          style: GoogleFonts.poppins(),
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            '''Terms and Conditions for Smart Water System
+      builder:
+          (context) => AlertDialog(
+            title: Text('Terms and Conditions', style: GoogleFonts.poppins()),
+            content: SingleChildScrollView(
+              child: Text(
+                '''Terms and Conditions for Smart Water System
 
 Effective Date: [Date]
 
@@ -394,19 +340,16 @@ These Terms are governed by and interpreted in accordance with the laws of [Your
 
 7. Contact Us
 If you have any questions about these Terms, please contact us at support@smartwater.com''',
-            style: GoogleFonts.poppins(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Close',
-              style: GoogleFonts.poppins(),
+                style: GoogleFonts.poppins(),
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Close', style: GoogleFonts.poppins()),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -442,12 +385,14 @@ If you have any questions about these Terms, please contact us at support@smartw
             trailing: const Icon(Icons.chevron_right, color: Colors.grey),
             onTap: _showPersonalInfoDialog,
           ),
-          
-         
+
           // Privacy & Security section
           _buildSectionHeader('Privacy & Security'),
           ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined, color: Colors.white),
+            leading: const Icon(
+              Icons.privacy_tip_outlined,
+              color: Colors.white,
+            ),
             title: Text(
               'Privacy Policy',
               style: GoogleFonts.poppins(color: Colors.white),
@@ -478,7 +423,10 @@ If you have any questions about these Terms, please contact us at support@smartw
             onTap: _showHelpSupportDialog,
           ),
           ListTile(
-            leading: const Icon(Icons.description_outlined, color: Colors.white),
+            leading: const Icon(
+              Icons.description_outlined,
+              color: Colors.white,
+            ),
             title: Text(
               'Terms and conditions',
               style: GoogleFonts.poppins(color: Colors.white),
@@ -517,10 +465,7 @@ If you have any questions about these Terms, please contact us at support@smartw
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              color: Colors.black.withOpacity(0.2),
-            ),
+            BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(0.2)),
           ],
         ),
         child: ClipRRect(
@@ -532,12 +477,16 @@ If you have any questions about these Terms, please contact us at support@smartw
               if (index == 0) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const AquariumControlPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const AquariumControlPage(),
+                  ),
                 );
               } else if (index == 1) {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const StatisticsScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const StatisticsScreen(),
+                  ),
                 );
               }
             },
@@ -548,7 +497,10 @@ If you have any questions about these Terms, please contact us at support@smartw
             items: [
               BottomNavigationBarItem(
                 icon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(24),
@@ -560,9 +512,7 @@ If you have any questions about these Terms, please contact us at support@smartw
                       const SizedBox(width: 8),
                       Text(
                         "Home",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -571,7 +521,10 @@ If you have any questions about these Terms, please contact us at support@smartw
               ),
               BottomNavigationBarItem(
                 icon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(24),
@@ -583,9 +536,7 @@ If you have any questions about these Terms, please contact us at support@smartw
                       const SizedBox(width: 8),
                       Text(
                         "Analytics",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -594,7 +545,10 @@ If you have any questions about these Terms, please contact us at support@smartw
               ),
               BottomNavigationBarItem(
                 icon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange,
                     borderRadius: BorderRadius.circular(24),
@@ -606,9 +560,7 @@ If you have any questions about these Terms, please contact us at support@smartw
                       const SizedBox(width: 8),
                       Text(
                         "Settings",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -620,6 +572,22 @@ If you have any questions about these Terms, please contact us at support@smartw
         ),
       ),
     );
+  }
+
+  Future<void> signOutAndRedirect(BuildContext context) async {
+    final googleSignIn = GoogleSignIn();
+
+    try {
+      await googleSignIn.signOut();
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => SignInScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      print('Error during sign-out: $e');
+    }
   }
 
   Widget _buildSectionHeader(String title) {
