@@ -78,14 +78,19 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1A),
-      appBar: AppBar(
-        title: const Text('Smart Water Tank'),
-        backgroundColor: Colors.black,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            const Text(
+              'Smart Water Tank',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
             _buildSensorCard("Water Level", "$waterLevel cm", Icons.water_drop),
             const SizedBox(height: 20),
             _buildSensorCard(

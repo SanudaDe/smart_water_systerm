@@ -12,26 +12,32 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  double _currentPH = 0.0;
-  List<double> _phHistory = [];
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref('ph_data');
   late StreamSubscription<DatabaseEvent> _subscription;
+
+  Map<String, Map<String, double>> weeklyPH =
+      {}; // week => {product1, product2, product3}
 
   @override
   void initState() {
     super.initState();
-    _listenToPH();
+    _listenToPHData();
   }
 
-  void _listenToPH() {
-    final dbRef = FirebaseDatabase.instance.ref('sensors/ph');
-    _subscription = dbRef.onValue.listen((event) {
-      final value = double.tryParse(event.snapshot.value.toString()) ?? 0.0;
+  void _listenToPHData() {
+    _subscription = _dbRef.onValue.listen((event) {
+      final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+      Map<String, Map<String, double>> parsedData = {};
+      for (var week in data.keys) {
+        final weekData = Map<String, dynamic>.from(data[week]);
+        parsedData[week] = {
+          'product1': double.tryParse(weekData['product1'].toString()) ?? 0.0,
+          'product2': double.tryParse(weekData['product2'].toString()) ?? 0.0,
+          'product3': double.tryParse(weekData['product3'].toString()) ?? 0.0,
+        };
+      }
       setState(() {
-        _currentPH = value;
-        _phHistory.add(value);
-        if (_phHistory.length > 10) {
-          _phHistory.removeAt(0);
-        }
+        weeklyPH = parsedData;
       });
     });
   }
@@ -46,56 +52,59 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1A),
-      appBar: AppBar(
-        title: Text(
-          'Analytics',
-          style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.black,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
             Text(
-              'Live pH Value: ${_currentPH.toStringAsFixed(1)}',
-              style: const TextStyle(color: Colors.white, fontSize: 20),
+              'Average PH In Your Tank',
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Updated Weekly',
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 20),
             Expanded(
               child:
-                  _phHistory.length < 2
+                  weeklyPH.isEmpty
                       ? const Center(child: CircularProgressIndicator())
                       : BarChart(
                         BarChartData(
                           alignment: BarChartAlignment.spaceAround,
-                          maxY: 14,
+                          maxY: 10,
                           minY: 0,
                           barTouchData: BarTouchData(enabled: true),
                           titlesData: FlTitlesData(
                             leftTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
-                                reservedSize: 30,
-                                getTitlesWidget: (value, meta) {
-                                  return Text(
-                                    value.toStringAsFixed(0),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
+                                reservedSize: 28,
+                                getTitlesWidget:
+                                    (value, meta) => Text(
+                                      value.toStringAsFixed(0),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                      ),
                                     ),
-                                  );
-                                },
                               ),
                             ),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
+                                  final week = weeklyPH.keys.elementAt(
+                                    value.toInt(),
+                                  );
                                   return Text(
-                                    '${value.toInt() + 1}',
+                                    week,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
@@ -114,28 +123,64 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                           gridData: FlGridData(show: true),
                           borderData: FlBorderData(show: false),
                           barGroups:
-                              _phHistory
-                                  .asMap()
-                                  .entries
-                                  .map(
-                                    (e) => BarChartGroupData(
-                                      x: e.key,
-                                      barRods: [
-                                        BarChartRodData(
-                                          toY: e.value,
-                                          color: Colors.green,
-                                          width: 12,
-                                        ),
-                                      ],
+                              weeklyPH.entries.map((entry) {
+                                int index = weeklyPH.keys.toList().indexOf(
+                                  entry.key,
+                                );
+                                return BarChartGroupData(
+                                  x: index,
+                                  barRods: [
+                                    BarChartRodData(
+                                      toY: entry.value['product1'] ?? 0,
+                                      color: Colors.red,
+                                      width: 7,
                                     ),
-                                  )
-                                  .toList(),
+                                    BarChartRodData(
+                                      toY: entry.value['product2'] ?? 0,
+                                      color: Colors.lightBlue,
+                                      width: 7,
+                                    ),
+                                    BarChartRodData(
+                                      toY: entry.value['product3'] ?? 0,
+                                      color: Colors.green,
+                                      width: 7,
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
                         ),
                       ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: const [
+                Legend(color: Colors.red, label: 'Product 1'),
+                Legend(color: Colors.lightBlue, label: 'Product 2'),
+                Legend(color: Colors.green, label: 'Product 3'),
+              ],
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class Legend extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const Legend({super.key, required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(width: 10, height: 10, color: color),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(color: Colors.white)),
+      ],
     );
   }
 }
