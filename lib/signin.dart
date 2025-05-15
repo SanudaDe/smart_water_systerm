@@ -57,7 +57,10 @@ class _SignInScreenState extends State<SignInScreen> {
       }
     } catch (e, stacktrace) {
       print("Google Sign-In Error: $e");
-      print(stacktrace);
+      print("Stacktrace: $stacktrace");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Sign-In Failed: $e")));
       return null;
     }
 
