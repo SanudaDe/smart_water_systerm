@@ -22,20 +22,28 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
   double temperature = 0.0;
   double phQuality = 0.0;
   
+  // Status variables
+  bool isLoading = false;
+  String errorMessage = '';
+  DateTime lastUpdated = DateTime.now();
+  
   // Timer for periodic updates
   Timer? _timer;
   
   // API endpoint - replace with your actual IoT device endpoint
-  final String apiUrl = "https://your-iot-api-endpoint.com/sensors";
+  // Example: "http://192.168.1.100/api/sensors" for local network
+  // Or use your IoT platform's API endpoint
+  final String apiUrl = "http://10.244.144.122/api/sensors";
 
   @override
   void initState() {
     super.initState();
     _updateGreeting();
+    // Initial data fetch
     _fetchSensorData();
     
-    // Set up periodic updates every 5 seconds
-    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) {
+    // Set up periodic updates every 3 seconds
+    _timer = Timer.periodic(const Duration(seconds: 3), (Timer t) {
       _fetchSensorData();
     });
   }
@@ -47,23 +55,40 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
   }
 
   Future<void> _fetchSensorData() async {
+    // Don't fetch if we're already loading
+    if (isLoading) return;
+    
+    setState(() {
+      isLoading = true;
+      errorMessage = '';
+    });
+    
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      // You can use a timeout to prevent long waiting times
+      final response = await http.get(Uri.parse(apiUrl))
+          .timeout(const Duration(seconds: 5));
       
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          waterLevel = double.tryParse(data['water_level'].toString()) ?? 0.0;
-          temperature = double.tryParse(data['temperature'].toString()) ?? 0.0;
-          phQuality = double.tryParse(data['ph_quality'].toString()) ?? 0.0;
+          // Parse your actual sensor data format here
+          waterLevel = double.tryParse(data['water_level'].toString()) ?? waterLevel;
+          temperature = double.tryParse(data['temperature'].toString()) ?? temperature;
+          phQuality = double.tryParse(data['ph_quality'].toString()) ?? phQuality;
+          lastUpdated = DateTime.now();
+          isLoading = false;
         });
       } else {
-        // Handle error - you might want to show a snackbar or keep old values
-        print('Failed to fetch sensor data: ${response.statusCode}');
+        setState(() {
+          errorMessage = 'Failed to fetch sensor data: ${response.statusCode}';
+          isLoading = false;
+        });
       }
     } catch (e) {
-      print('Error fetching sensor data: $e');
-      // You might want to show an error to the user here
+      setState(() {
+        errorMessage = 'Connection error: $e';
+        isLoading = false;
+      });
     }
   }
 
@@ -108,15 +133,52 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
     }
   }
 
-  void sendCommand(String command) {
-    // Implement actual IoT command sending here
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Sent "$command" command to device')),
-    );
+  Future<void> sendCommand(String command) async {
+    setState(() {
+      isLoading = true;
+    });
     
-    // Example of sending a command to your IoT device
-    // http.post(Uri.parse('https://your-iot-api-endpoint.com/commands'), 
-    //   body: json.encode({'command': command}));
+    try {
+      // Send command to IoT device
+      final response = await http.post(
+        Uri.parse('$apiUrl/command'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'command': command})
+      ).timeout(const Duration(seconds: 5));
+      
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Successfully sent "$command" command to device')),
+        );
+        // Fetch updated data after sending command
+        _fetchSensorData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send command: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending command: $e')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  String _getLastUpdatedText() {
+    final now = DateTime.now();
+    final difference = now.difference(lastUpdated);
+    
+    if (difference.inSeconds < 60) {
+      return 'Updated ${difference.inSeconds} seconds ago';
+    } else if (difference.inMinutes < 60) {
+      return 'Updated ${difference.inMinutes} minutes ago';
+    } else {
+      return 'Updated ${difference.inHours} hours ago';
+    }
   }
 
   @override
@@ -209,13 +271,50 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "$_greeting,",
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "$_greeting,",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  // Status indicator
+                  Row(
+                    children: [
+                      // Show loading indicator or error icon
+                      if (isLoading)
+                        Container(
+                          width: 12,
+                          height: 12,
+                          margin: const EdgeInsets.only(right: 6),
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                          ),
+                        )
+                      else if (errorMessage.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          child: const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                        ),
+                      Text(
+                        _getLastUpdatedText(),
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
 
               const SizedBox(height: 30),
@@ -254,10 +353,10 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                             ),
                           ),
                           const Spacer(),
-                          // Add refresh button
+                          // Add manual refresh button
                           IconButton(
                             icon: const Icon(Icons.refresh, color: Colors.white),
-                            onPressed: _fetchSensorData,
+                            onPressed: isLoading ? null : _fetchSensorData,
                           ),
                         ],
                       ),
@@ -303,6 +402,21 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                               ],
                             ),
                           ),
+                          // Show loading overlay
+                          if (isLoading)
+                            Container(
+                              color: Colors.black.withOpacity(0.3),
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -317,7 +431,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () => sendCommand("refill"),
+                      onPressed: isLoading ? null : () => sendCommand("refill"),
                       icon: const Icon(Icons.water_drop),
                       label: const Text("Refill Tank"),
                       style: ElevatedButton.styleFrom(
@@ -336,7 +450,7 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                   const SizedBox(width: 24),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () => sendCommand("clean"),
+                      onPressed: isLoading ? null : () => sendCommand("clean"),
                       icon: const Icon(Icons.cleaning_services),
                       label: const Text("Clean Tank"),
                       style: ElevatedButton.styleFrom(
@@ -367,24 +481,62 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Stack(
                         children: [
-                          Text(
-                            "${temperature.toStringAsFixed(1)}°C",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "${temperature.toStringAsFixed(1)}°C",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Text(
+                                "Temperature",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Color indicator based on temperature
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: temperature > 30 ? Colors.red : 
+                                       temperature > 25 ? Colors.orange : 
+                                       temperature < 15 ? Colors.blue : 
+                                       Colors.green,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  topRight: Radius.circular(8),
+                                ),
+                              ),
                             ),
                           ),
-                          const Text(
-                            "Temperature",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                          // Show loading overlay
+                          if (isLoading)
+                            Container(
+                              color: Colors.black.withOpacity(0.3),
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -397,30 +549,91 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
                         color: Colors.black,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Stack(
                         children: [
-                          Text(
-                            phQuality.toStringAsFixed(1),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                phQuality.toStringAsFixed(1),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Text(
+                                "PH Quality",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          // Color indicator based on pH
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: phQuality > 8.5 ? Colors.red :
+                                       phQuality < 6.5 ? Colors.red :
+                                       phQuality > 8.0 ? Colors.orange :
+                                       phQuality < 7.0 ? Colors.orange :
+                                       Colors.green,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  topRight: Radius.circular(8),
+                                ),
+                              ),
                             ),
                           ),
-                          const Text(
-                            "PH Quality",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                          // Show loading overlay
+                          if (isLoading)
+                            Container(
+                              color: Colors.black.withOpacity(0.3),
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
                   ),
                 ],
               ),
+
+              if (errorMessage.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.only(top: 20),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          errorMessage,
+                          style: const TextStyle(color: Colors.white, fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
               const Spacer(),
             ],
