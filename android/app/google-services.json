@@ -12,7 +12,20 @@
           "package_name": "com.example.smart_water_systerm"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "106823966849-90vu6aj5r26uensv5vddqp0uv1g8uib2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.smart_water_systerm",
+            "certificate_hash": "b905e9f162aec27980fc0b0e32a65ad33e5c6c0f"
+          }
+        },
+        {
+          "client_id": "106823966849-tr6esr5j2biemcqbq0ikenf0nbgt79up.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCA-C_zYD0kFi6-hwS9kiOmXt6ZkKZ8oyo"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "106823966849-tr6esr5j2biemcqbq0ikenf0nbgt79up.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
