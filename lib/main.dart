@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:smart_water_systerm/statistics.dart';
-import 'package:smart_water_systerm/dashboard.dart';
-import 'package:smart_water_systerm/settings.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'dashboard.dart';
+import 'statistics.dart';
+import 'settings.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
   runApp(const MainApp());
 }
 
@@ -17,17 +20,64 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
-        // Add dark theme configuration to match your app's style
         brightness: Brightness.dark,
       ),
       debugShowCheckedModeBanner: false,
-      // Initial route setup
-      initialRoute: '/dashboard',
-      routes: {
-        '/dashboard': (context) => const AquariumControlPage(),
-        '/statistics': (context) => const StatisticsScreen(),
-        '/settings': (context) => const SettingsScreen(),
-      },
+      home: const NavigationHandler(),
+    );
+  }
+}
+
+class NavigationHandler extends StatefulWidget {
+  const NavigationHandler({super.key});
+
+  @override
+  State<NavigationHandler> createState() => _NavigationHandlerState();
+}
+
+class _NavigationHandlerState extends State<NavigationHandler> {
+  int _selectedIndex = 0;
+  final PageController _pageController = PageController();
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    _pageController.jumpToPage(index);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        physics: const NeverScrollableScrollPhysics(), // disable swipe
+        children: const [
+          DashboardPage(), // Your dashboard.dart should export this
+          StatisticsScreen(), // Live chart screen
+          SettingsScreen(), // Settings page
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: false,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Dashboard'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.analytics),
+            label: 'Analytics',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+      ),
     );
   }
 }

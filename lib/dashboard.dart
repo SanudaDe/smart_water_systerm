@@ -1,42 +1,32 @@
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:smart_water_systerm/settings.dart';
-import 'package:smart_water_systerm/statistics.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
-class AquariumControlPage extends StatefulWidget {
-  const AquariumControlPage({super.key});
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
 
   @override
-  State<AquariumControlPage> createState() => _AquariumControlPageState();
+  State<DashboardPage> createState() => _DashboardPageState();
 }
 
-class _AquariumControlPageState extends State<AquariumControlPage> {
-  int _selectedIndex = 0;
-  String _greeting = "";
-  
-  // Sensor data variables
+class _DashboardPageState extends State<DashboardPage> {
   double waterLevel = 0.0;
   double temperature = 0.0;
   double phQuality = 0.0;
-  
-  // Timer for periodic updates
   Timer? _timer;
-  
-  // API endpoint - replace with your actual IoT device endpoint
-  final String apiUrl = "https://your-iot-api-endpoint.com/sensors";
+
+  final String firebaseUrl =
+      'https://smart-water-systerm-default-rtdb.firebaseio.com/smart_tank.json';
+  final String washMotorUrl =
+      'https://smart-water-systerm-default-rtdb.firebaseio.com/smart_tank/wash_motor.json';
 
   @override
   void initState() {
     super.initState();
-    _updateGreeting();
-    _fetchSensorData();
-    
-    // Set up periodic updates every 5 seconds
-    _timer = Timer.periodic(const Duration(seconds: 5), (Timer t) {
-      _fetchSensorData();
+    fetchSensorData();
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      fetchSensorData();
     });
   }
 
@@ -46,386 +36,132 @@ class _AquariumControlPageState extends State<AquariumControlPage> {
     super.dispose();
   }
 
-  Future<void> _fetchSensorData() async {
+  Future<void> fetchSensorData() async {
     try {
-      final response = await http.get(Uri.parse(apiUrl));
-      
+      final response = await http.get(Uri.parse(firebaseUrl));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          waterLevel = double.tryParse(data['water_level'].toString()) ?? 0.0;
+          waterLevel = double.tryParse(data['distance'].toString()) ?? 0.0;
           temperature = double.tryParse(data['temperature'].toString()) ?? 0.0;
-          phQuality = double.tryParse(data['ph_quality'].toString()) ?? 0.0;
+          phQuality = double.tryParse(data['ph'].toString()) ?? 0.0;
         });
       } else {
-        // Handle error - you might want to show a snackbar or keep old values
-        print('Failed to fetch sensor data: ${response.statusCode}');
+        debugPrint('Failed to load Firebase data');
       }
     } catch (e) {
-      print('Error fetching sensor data: $e');
-      // You might want to show an error to the user here
+      debugPrint('Error fetching Firebase data: $e');
     }
   }
 
-  void _updateGreeting() {
-    final hour = DateTime.now().hour;
-    setState(() {
-      if (hour < 12) {
-        _greeting = "Good Morning";
-      } else if (hour < 17) {
-        _greeting = "Good Afternoon";
-      } else if (hour < 21) {
-        _greeting = "Good Evening";
+  Future<void> triggerWasherMotor() async {
+    try {
+      final response = await http.put(
+        Uri.parse(washMotorUrl),
+        body: json.encode("ON"),
+      );
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("🌀 Washer motor triggered")),
+        );
       } else {
-        _greeting = "Good Night";
+        throw Exception("Failed to update Firebase");
       }
-    });
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    
-    if (index == 1) {
-      Navigator.push(
+    } catch (e) {
+      ScaffoldMessenger.of(
         context,
-        MaterialPageRoute(builder: (context) => const StatisticsScreen()),
-      ).then((_) {
-        setState(() {
-          _selectedIndex = 0;
-        });
-      });
-    } else if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const SettingsScreen()),
-      ).then((_) {
-        setState(() {
-          _selectedIndex = 0;
-        });
-      });
+      ).showSnackBar(SnackBar(content: Text("❌ Error: $e")));
     }
-  }
-
-  void sendCommand(String command) {
-    // Implement actual IoT command sending here
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Sent "$command" command to device')),
-    );
-    
-    // Example of sending a command to your IoT device
-    // http.post(Uri.parse('https://your-iot-api-endpoint.com/commands'), 
-    //   body: json.encode({'command': command}));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1E1E1A),
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              color: Colors.black.withOpacity(0.2),
+      appBar: AppBar(
+        title: const Text('Smart Water Tank'),
+        backgroundColor: Colors.black,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            _buildSensorCard("Water Level", "$waterLevel cm", Icons.water_drop),
+            const SizedBox(height: 20),
+            _buildSensorCard(
+              "Temperature",
+              "$temperature °C",
+              Icons.thermostat,
+            ),
+            const SizedBox(height: 20),
+            _buildSensorCard("pH Quality", "$phQuality", Icons.science),
+            const SizedBox(height: 40),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Future refill logic
+                  },
+                  icon: const Icon(Icons.water),
+                  label: const Text("Refill"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 15,
+                    ),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: triggerWasherMotor,
+                  icon: const Icon(Icons.cleaning_services),
+                  label: const Text("Clean"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 15,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.black,
-            currentIndex: _selectedIndex,
-            onTap: _onItemTapped,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.grey,
-            showSelectedLabels: true,
-            showUnselectedLabels: false,
-            items: [
-              BottomNavigationBarItem(
-                icon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _selectedIndex == 0 ? Colors.green : Colors.transparent,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.home, size: 22),
-                      SizedBox(width: 8),
-                      Text("Home", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _selectedIndex == 1 ? Colors.blue : Colors.transparent,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.analytics, size: 22),
-                      SizedBox(width: 8),
-                      Text("Analytics", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                label: '',
-              ),
-              BottomNavigationBarItem(
-                icon: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _selectedIndex == 2 ? Colors.orange : Colors.transparent,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.settings, size: 22),
-                      SizedBox(width: 8),
-                      Text("Settings", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-                label: '',
-              ),
-            ],
-          ),
-        ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
+    );
+  }
+
+  Widget _buildSensorCard(String label, String value, IconData icon) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 36),
+          const SizedBox(width: 16),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "$_greeting,",
-                style: GoogleFonts.poppins(
+                label,
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+              Text(
+                value,
+                style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 28,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-              const SizedBox(height: 30),
-
-              // Water level card
-              Container(
-                height: 180,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[800],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.water_drop,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            "Water",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                            ),
-                          ),
-                          const Spacer(),
-                          // Add refresh button
-                          IconButton(
-                            icon: const Icon(Icons.refresh, color: Colors.white),
-                            onPressed: _fetchSensorData,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: 100 * (waterLevel / 10), // Assuming 10 is max level
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Column(
-                                  children: [
-                                    Container(
-                                      height: 24,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(100),
-                                          topRight: Radius.circular(100),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        color: Colors.blue[400],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Text(
-                                  "Gal ${waterLevel.toStringAsFixed(1)}",
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Refill and Clean buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => sendCommand("refill"),
-                      icon: const Icon(Icons.water_drop),
-                      label: const Text("Refill Tank"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => sendCommand("clean"),
-                      icon: const Icon(Icons.cleaning_services),
-                      label: const Text("Clean Tank"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              // Sensor readings
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "${temperature.toStringAsFixed(1)}°C",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Text(
-                            "Temperature",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Expanded(
-                    child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            phQuality.toStringAsFixed(1),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Text(
-                            "PH Quality",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const Spacer(),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
