@@ -1,21 +1,9 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:firebase_core/firebase_core.dart';
 import 'dashboard.dart';
 import 'statistics.dart';
 import 'settings.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
-=======
-import 'package:smart_water_systerm/signin.dart';
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
->>>>>>> 09f908f6127119bf43357904091479d1ba58c9b0
+void main() {
   runApp(const MainApp());
 }
 
@@ -24,7 +12,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
     return MaterialApp(
       title: 'AquaSense',
       theme: ThemeData(
@@ -61,12 +48,8 @@ class _NavigationHandlerState extends State<NavigationHandler> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(), // disable swipe
-        children: const [
-          DashboardPage(), // Your dashboard.dart should export this
-          StatisticsScreen(), // Live chart screen
-          SettingsScreen(), // Settings page
-        ],
+        physics: const NeverScrollableScrollPhysics(), // disables swiping
+        children: const [DashboardPage(), StatisticsScreen(), SettingsScreen()],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
@@ -91,11 +74,3 @@ class _NavigationHandlerState extends State<NavigationHandler> {
     );
   }
 }
-=======
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: SignInScreen(),
-    );
-  }
-}
->>>>>>> 09f908f6127119bf43357904091479d1ba58c9b0
