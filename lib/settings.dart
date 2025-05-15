@@ -223,7 +223,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const FlutterLogo(size: 80),
+            Image.asset('images/logo.png', height: 80),
             const SizedBox(height: 16),
             Text(
               'Smart Water System v1.0.0',
